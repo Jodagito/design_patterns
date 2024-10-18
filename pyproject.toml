@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "design-patterns"
+version = "0.1.0"
+description = ""
+authors = ["Daniel Gil <jodagito@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pydantic = "^2.9.2"
+python-dotenv = "^1.0.1"
+requests = "^2.32.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
