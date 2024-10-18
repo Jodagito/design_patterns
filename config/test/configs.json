@@ -1,0 +1,7 @@
+{
+    "database_host": "test_value",
+    "database_user": "test_value",
+    "database_password": "test_value",
+    "database_port": "test_value",
+    "database_name": "test_value"
+}

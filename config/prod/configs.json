@@ -1,0 +1,7 @@
+{
+    "database_host": "prod_value",
+    "database_user": "prod_value",
+    "database_password": "prod_value",
+    "database_port": "prod_value",
+    "database_name": "prod_value"
+}
