@@ -1,8 +1,8 @@
 from unittest.mock import patch
 
 from design_patterns.factory_method.sms_notification import (
-    InvalidSinchResponse,
     SMSNotification,
+    SMSNotificationError,
 )
 
 from tests.base_test_case import BaseTestCase
@@ -36,7 +36,7 @@ class TestSMSNotification(BaseTestCase):
         message = "test_message"
         sms_notification.set_message_payload(message, "333333")
 
-        with self.assertRaises(InvalidSinchResponse) as ctxt:
+        with self.assertRaises(SMSNotificationError) as ctxt:
             sms_notification.send_notification()
             assert ctxt.msg == {"error": "test_error"}
 
