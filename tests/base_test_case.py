@@ -7,3 +7,4 @@ class BaseTestCase(TestCase):
     def setUp(self):
         super().setUp()
         ConfigsLoader().load_configs()
+        self.configs = ConfigsLoader().get_configs()
