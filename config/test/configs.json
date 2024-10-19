@@ -2,5 +2,10 @@
     "sinch_api_token": "test_value",
     "sinch_number": "test_value",
     "sinch_service_plan_id": "test_value",
-    "sinch_url": "https://us.sms.api.sinch.com/xms/v1/{sinch_service_plan_id}/batches"
+    "sinch_url": "https://us.sms.api.sinch.com/xms/v1/{sinch_service_plan_id}/batches",
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 465,
+    "smtp_login": "test_value",
+    "smtp_password": "test_value",
+    "default_smtp_email": "test_email@test.com"
 }
