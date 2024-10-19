@@ -1,4 +1,3 @@
-from unittest import TestCase
 from unittest.mock import patch
 
 from design_patterns.factory_method.sms_notification import (
@@ -6,10 +5,12 @@ from design_patterns.factory_method.sms_notification import (
     SMSNotification,
 )
 
+from tests.base_test_case import BaseTestCase
 
-class TestSMSNotification(TestCase):
+
+class TestSMSNotification(BaseTestCase):
     def setUp(self) -> None:
-        return super().setUp()
+        super().setUp()
 
     @patch('requests.post')
     def test_send_message(self, mock_post):
@@ -18,7 +19,7 @@ class TestSMSNotification(TestCase):
 
         sms_notification = SMSNotification()
         message = "test_message"
-        sms_notification.set_message(message)
+        sms_notification.set_message_payload(message, ["333333"])
         sms_notification.send_notification()
 
         mock_post.assert_called_once_with(sms_notification.url,
@@ -33,14 +34,14 @@ class TestSMSNotification(TestCase):
 
         sms_notification = SMSNotification()
         message = "test_message"
-        sms_notification.set_message(message)
+        sms_notification.set_message_payload(message, "333333")
 
         with self.assertRaises(InvalidSinchResponse) as ctxt:
             sms_notification.send_notification()
             assert ctxt.msg == {"error": "test_error"}
 
-    def test_set_message(self):
+    def test_set_message_payload(self):
         sms_notification = SMSNotification()
         message = "test_message"
-        sms_notification.set_message(message)
+        sms_notification.set_message_payload(message, "333333")
         assert sms_notification.payload["body"] == message
