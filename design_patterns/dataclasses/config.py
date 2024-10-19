@@ -3,8 +3,7 @@ from pydantic.dataclasses import dataclass
 
 @dataclass
 class Config:
-    database_host: str
-    database_user: str
-    database_password: str
-    database_port: str
-    database_name: str
+    sinch_api_token: str
+    sinch_number: str
+    sinch_service_plan_id: str
+    sinch_url: str
