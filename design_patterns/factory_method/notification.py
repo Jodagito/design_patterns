@@ -9,6 +9,7 @@ from design_patterns.singleton.config import ConfigsLoader
 class Notification(ABC):
     def __init__(self):
         self.configs = ConfigsLoader().get_configs()
+        self.payload: dict = None
 
     @abstractmethod
     def send_notification(self) -> None:
