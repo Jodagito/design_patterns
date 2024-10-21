@@ -1,4 +1,5 @@
 from unittest.mock import patch
+from uuid import uuid4
 
 from design_patterns.factory_method.email_notification import (
     EmailNotification,
@@ -11,54 +12,59 @@ class TestEmailNotification(BaseTestCase):
     def setUp(self):
         super().setUp()
 
-    @patch('smtplib.SMTP')
-    def test_send_email(self, mock_smtp):
-        mock_server = mock_smtp.return_value.__enter__.return_value
-
-        message = "Test message"
-        receiver_emails = ["test_email@test.com"]
+    @patch('boto3.client')
+    def test_send_email(self, mock_client):
+        mock_response = mock_client.return_value
 
         email_notification = EmailNotification()
-        email_notification.set_message_payload(message,
-                                               receiver_emails)
-        email_notification.send_notification()
-
-        mock_server.sendmail.assert_called_once_with(
-            self.configs.default_smtp_email, receiver_emails, message)
-
-    @patch('smtplib.SMTP')
-    def test_send_email_fails(self, mock_smtp):
-        mock_server = mock_smtp.return_value.__enter__.return_value
-        mock_server.sendmail.side_effect = EmailNotificationError(
-            "Error while sending the email")
-
         message = "Test message"
         receiver_emails = ["test_email@test.com"]
+        title = "Test Subject"
+
+        expected_aws_response = {
+            'MessageId': uuid4(),
+            'ResponseMetadata': {
+                'RequestId': uuid4(),
+                'HTTPStatusCode': 200
+            }
+        }
+        mock_response.send_email.return_value = expected_aws_response
+
+        email_notification.send_notification(message, receiver_emails, title)
+
+        expected_destination = {
+            'ToAddresses': receiver_emails
+        }
+        expected_message = {
+            'Subject': {
+                'Data': title,
+            },
+            'Body': {
+                'Text': {
+                    'Data': message
+                },
+                'Html': {
+                    'Data': None
+                }
+            }
+        }
+
+        mock_response.send_email.assert_called_once_with(
+            Source=self.configs.default_source_email,
+            Destination=expected_destination, Message=expected_message)
+
+    @patch('boto3.client')
+    def test_send_email_fails(self, mock_client):
+        mock_response = mock_client.return_value
+        mock_response.send_email.side_effect = Exception()
 
         email_notification = EmailNotification()
-        email_notification.set_message_payload(message,
-                                               receiver_emails)
+        message = "Test message"
+        receiver_emails = ["test_email@test.com"]
+        title = "Test Subject"
 
         with self.assertRaises(EmailNotificationError) as ctxt:
-            email_notification.send_notification()
-            assert ctxt.msg == "Error while sending the email"
-
-    @patch('smtplib.SMTP')
-    def test_send_email_without_payload(self, mock_smtp):
-        email_notification = EmailNotification()
-
-        with self.assertRaises(EmailNotificationError) as ctxt:
-            email_notification.send_notification()
-            assert ctxt.msg == "No message payload has been set"
-
-    def test_set_message_payload(self):
-        message = "Test message"
-        receiver_emails = ["test_email@test.com"]
-
-        email_notification = EmailNotification()
-        email_notification.set_message_payload(message,
-                                               receiver_emails)
-
-        expected_payload = {"message": message,
-                            "receiver_emails": receiver_emails}
-        assert email_notification.payload == expected_payload
+            email_notification.send_notification(message, receiver_emails,
+                                                 title)
+            assert ctxt.msg == \
+                "There was an error while sending the email notification"
