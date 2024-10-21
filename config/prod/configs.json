@@ -1,8 +1,5 @@
 {
-    "sinch_api_token": "prod_value",
-    "sinch_number": "prod_value",
-    "sinch_service_plan_id": "prod_value",
-    "sinch_url": "https://us.sms.api.sinch.com/xms/v1/{sinch_service_plan_id}/batches",
+    "sms_sender_number": "prod_value",
     "smtp_server": "smtp.gmail.com",
     "smtp_port": 465,
     "smtp_login": "prod_value",

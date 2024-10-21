@@ -33,11 +33,11 @@ class TestConfig(BaseTestCase):
         configs_loader = ConfigsLoader()
         configs_loader.load_configs()
         configs = configs_loader.get_configs()
-        assert configs.sinch_api_token == "test_value"
+        assert configs.sms_sender_number == "test_value"
 
     @patch.dict(os.environ, {'RUN_MODE': 'prod'})
     def test_run_mode_prod_env_var(self):
         configs_loader = ConfigsLoader()
         configs_loader.load_configs()
         configs = configs_loader.get_configs()
-        assert configs.sinch_api_token == "prod_value"
+        assert configs.sms_sender_number == "prod_value"
