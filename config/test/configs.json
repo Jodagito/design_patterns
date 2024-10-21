@@ -1,5 +1,8 @@
 {
     "aws_region": "us-west-2",
     "sms_sender_number": "test_value",
-    "default_source_email": "test_email@test.com"
+    "default_source_email": "test_email@test.com",
+    "android_application_arn": null,
+    "browser_application_arn": null,
+    "ios_application_arn": null
 }
