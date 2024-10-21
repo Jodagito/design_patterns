@@ -19,7 +19,7 @@ class Notification(ABC):
         pass
 
     @abstractmethod
-    def _lambda_handler(self) -> None:
+    def _aws_client_handler(self) -> None:
         pass
 
     @abstractmethod

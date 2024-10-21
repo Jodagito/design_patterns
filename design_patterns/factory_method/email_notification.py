@@ -21,9 +21,9 @@ class EmailNotification(Notification):
 
         self._set_message_payload(message, receiver_emails, title,
                                   html_template)
-        self._lambda_handler()
+        self._aws_client_handler()
 
-    def _lambda_handler(self) -> None:
+    def _aws_client_handler(self) -> None:
         try:
             message = self.payload.message
             receiver_emails = self.payload.receiver_emails

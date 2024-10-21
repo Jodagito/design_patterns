@@ -18,9 +18,9 @@ class SMSNotification(Notification):
                           receiver_number: str,
                           sms_type: SMSType) -> None:
         self._set_message_payload(message, receiver_number)
-        self._lambda_handler(sms_type)
+        self._aws_client_handler(sms_type)
 
-    def _lambda_handler(self, sms_type: SMSType) -> None:
+    def _aws_client_handler(self, sms_type: SMSType) -> None:
         try:
             response = self.client.publish(
                 PhoneNumber=self.payload.phone_number,
