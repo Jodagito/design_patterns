@@ -1,6 +1,9 @@
-import requests
-
+from design_patterns.dataclasses.sms_notification import (
+    MessagePayload,
+    SMSType,
+)
 from design_patterns.factory_method.notification import Notification
+from design_patterns.models.sms_notification import SMSResponse
 
 
 class SMSNotificationError(Exception):
@@ -9,30 +12,39 @@ class SMSNotificationError(Exception):
 
 class SMSNotification(Notification):
     def __init__(self):
-        super().__init__()
-        self.sinch_service_plan_id: str = self.configs.sinch_service_plan_id
-        self.sinch_api_token: str = self.configs.sinch_api_token
-        self.sinch_number: str = self.configs.sinch_number
+        super().__init__('sns')
 
-        self.url: str = self.configs.sinch_url.format(
-            sinch_service_plan_id=self.sinch_service_plan_id)
-        self.headers: dict = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.sinch_api_token}"
-        }
+    def send_notification(self, message: str,
+                          receiver_number: str,
+                          sms_type: SMSType) -> None:
+        self._set_message_payload(message, receiver_number)
+        self._lambda_handler(sms_type)
 
-    def send_notification(self) -> None:
-        response = requests.post(self.url, json=self.payload,
-                                 headers=self.headers)
+    def _lambda_handler(self, sms_type: SMSType) -> None:
         try:
-            assert response.status_code == 200
-        except AssertionError:
-            raise SMSNotificationError(response.json())
+            response = self.client.publish(
+                PhoneNumber=self.payload.phone_number,
+                Message=self.payload.message,
+                MessageAttributes={
+                    'AWS.SNS.SMS.SenderID': {
+                        'DataType': 'String',
+                        'StringValue': self.payload.sender
+                    },
+                    'AWS.SNS.SMS.SMSType': {
+                        'DataType': 'String',
+                        'StringValue': sms_type
+                    }
+                }
+            )
+            response = SMSResponse(**response)
+            assert response.response_metadata.http_status_code == 200
+        except Exception:
+            raise SMSNotificationError(
+                "There was an error while trying to send the SMS notification")
 
-    def set_message_payload(self, message: str,
-                            receiver_numbers: list[str]) -> None:
-        self.payload = {
-            "from": self.sinch_number,
-            "to": receiver_numbers,
-            "body": message
-        }
+    def _set_message_payload(self, message: str, receiver_number: str) -> None:
+        self.payload = MessagePayload(
+            message=message,
+            phone_number=receiver_number,
+            sender=self.configs.sms_sender_number
+        )
