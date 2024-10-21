@@ -1,5 +1,7 @@
+from uuid import uuid4
 from unittest.mock import patch
 
+from design_patterns.dataclasses.sms_notification import SMSType
 from design_patterns.factory_method.sms_notification import (
     SMSNotification,
     SMSNotificationError,
@@ -12,36 +14,55 @@ class TestSMSNotification(BaseTestCase):
     def setUp(self) -> None:
         super().setUp()
 
-    @patch('requests.post')
-    def test_send_message(self, mock_post):
-        mock_response = mock_post.return_value
-        mock_response.status_code = 200
+    @patch('boto3.client')
+    def test_send_notification(self, mock_client):
+        mock_response = mock_client.return_value
 
         sms_notification = SMSNotification()
         message = "test_message"
-        sms_notification.set_message_payload(message, ["333333"])
-        sms_notification.send_notification()
+        receiver_number = "333333"
+        sms_type = SMSType.PROMOTIONAL
 
-        mock_post.assert_called_once_with(sms_notification.url,
-                                          json=sms_notification.payload,
-                                          headers=sms_notification.headers)
+        expected_sms_response = {
+            'MessageId': uuid4(),
+            'ResponseMetadata': {
+                'RequestId': uuid4(),
+                'HTTPStatusCode': 200
+                }
+            }
+        mock_response.publish.return_value = expected_sms_response
 
-    @patch('requests.post')
-    def test_send_message_fails(self, mock_post):
-        mock_response = mock_post.return_value
-        mock_response.status_code = 400
-        mock_response.json.return_value = {"error": "test_error"}
+        sms_notification.send_notification(message, receiver_number, sms_type)
+
+        expected_message_attributes = {
+            'AWS.SNS.SMS.SenderID': {
+                'DataType': 'String',
+                'StringValue': sms_notification.payload.sender
+            },
+            'AWS.SNS.SMS.SMSType': {
+                'DataType': 'String',
+                'StringValue': sms_type
+            }
+        }
+
+        mock_response.publish.assert_called_once_with(
+            PhoneNumber=sms_notification.payload.phone_number,
+            Message=sms_notification.payload.message,
+            MessageAttributes=expected_message_attributes)
+
+    @patch('boto3.client')
+    def test_send_notification_fails(self, mock_client):
+        mock_response = mock_client.return_value
+        mock_response.publish.side_effect = Exception()
 
         sms_notification = SMSNotification()
         message = "test_message"
-        sms_notification.set_message_payload(message, "333333")
+        receiver_number = "333333"
+        sms_type = SMSType.PROMOTIONAL
 
         with self.assertRaises(SMSNotificationError) as ctxt:
-            sms_notification.send_notification()
-            assert ctxt.msg == {"error": "test_error"}
-
-    def test_set_message_payload(self):
-        sms_notification = SMSNotification()
-        message = "test_message"
-        sms_notification.set_message_payload(message, "333333")
-        assert sms_notification.payload["body"] == message
+            sms_notification.send_notification(message,
+                                               receiver_number,
+                                               sms_type)
+            assert ctxt.msg == \
+                "There was an error while trying to send the SMS notification"
