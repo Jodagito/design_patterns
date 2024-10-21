@@ -3,7 +3,7 @@ from design_patterns.dataclasses.sms_notification import (
     SMSType,
 )
 from design_patterns.factory_method.notification import Notification
-from design_patterns.models.sms_notification import SMSResponse
+from design_patterns.models.notification import AWSNotificationResponse
 
 
 class SMSNotificationError(Exception):
@@ -36,7 +36,7 @@ class SMSNotification(Notification):
                     }
                 }
             )
-            response = SMSResponse(**response)
+            response = AWSNotificationResponse(**response)
             assert response.response_metadata.http_status_code == 200
         except Exception:
             raise SMSNotificationError(

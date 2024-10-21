@@ -8,7 +8,7 @@ class ResponseMetadata(BaseModel):
     http_status_code: int
 
 
-class SMSResponse(BaseModel):
+class AWSNotificationResponse(BaseModel):
     message_id: UUID
     response_metadata: ResponseMetadata
 

@@ -1,5 +1,5 @@
-from uuid import uuid4
 from unittest.mock import patch
+from uuid import uuid4
 
 from design_patterns.dataclasses.sms_notification import SMSType
 from design_patterns.factory_method.sms_notification import (
@@ -23,14 +23,14 @@ class TestSMSNotification(BaseTestCase):
         receiver_number = "333333"
         sms_type = SMSType.PROMOTIONAL
 
-        expected_sms_response = {
+        expected_aws_response = {
             'MessageId': uuid4(),
             'ResponseMetadata': {
                 'RequestId': uuid4(),
                 'HTTPStatusCode': 200
-                }
             }
-        mock_response.publish.return_value = expected_sms_response
+        }
+        mock_response.publish.return_value = expected_aws_response
 
         sms_notification.send_notification(message, receiver_number, sms_type)
 
