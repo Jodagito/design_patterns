@@ -12,7 +12,7 @@ class Notification(ABC):
     def __init__(self, client: str):
         self.configs = ConfigsLoader().get_configs()
         self.payload: dict = None
-        self.client = boto3.client(client)
+        self.client = boto3.client(client, self.configs.aws_region)
 
     @abstractmethod
     def send_notification(self) -> None:
