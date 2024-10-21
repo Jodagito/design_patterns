@@ -1,8 +1,4 @@
 {
     "sms_sender_number": "test_value",
-    "smtp_server": "smtp.gmail.com",
-    "smtp_port": 465,
-    "smtp_login": "test_value",
-    "smtp_password": "test_value",
-    "default_smtp_email": "test_email@test.com"
+    "default_source_email": "test_email@test.com"
 }

@@ -1,8 +1,4 @@
 {
     "sms_sender_number": "prod_value",
-    "smtp_server": "smtp.gmail.com",
-    "smtp_port": 465,
-    "smtp_login": "prod_value",
-    "smtp_password": "prod_value",
-    "default_smtp_email": "prod_email@prod.com"
+    "default_source_email": "prod_email@prod.com"
 }
