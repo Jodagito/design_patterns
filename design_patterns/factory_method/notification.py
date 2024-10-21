@@ -23,5 +23,5 @@ class Notification(ABC):
         pass
 
     @abstractmethod
-    def _set_message_payload(self, message: str) -> None:
+    def _set_message_payload(self) -> None:
         pass
