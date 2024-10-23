@@ -1,6 +1,5 @@
 from design_patterns.dataclasses.email_notification import MessagePayload
 from design_patterns.factory_method.notification import Notification
-from design_patterns.models.notification import AWSNotificationResponse
 
 
 class EmailNotificationError(Exception):
@@ -25,31 +24,10 @@ class EmailNotification(Notification):
 
     def _aws_client_handler(self) -> None:
         try:
-            message = self.payload.message
-            receiver_emails = self.payload.receiver_emails
-            title = self.payload.title
-            html_template = self.payload.html_template
-
-            response = self.client.send_email(
-                Source=self.configs.default_source_email,
-                Destination={
-                    'ToAddresses': receiver_emails
-                },
-                Message={
-                    'Subject': {
-                        'Data': title,
-                    },
-                    'Body': {
-                        'Text': {
-                            'Data': message
-                        },
-                        'Html': {
-                            'Data': html_template
-                        }
-                    }
-                }
-            )
-            response = AWSNotificationResponse(**response)
+            response = self.client.perform_operation(
+                self.configs.default_source_email,
+                self.payload.receiver_emails, self.payload.title,
+                self.payload.message, self.payload.html_template)
             assert response.response_metadata.http_status_code == 200
         except Exception:
             raise EmailNotificationError(

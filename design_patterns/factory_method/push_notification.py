@@ -1,5 +1,7 @@
 from dataclasses import asdict
 
+from design_patterns.dataclasses.aws_client_strategy import \
+    AWSClientStrategyType
 from design_patterns.dataclasses.push_notification import (
     APNSMessage,
     GCMMessage,
@@ -8,7 +10,6 @@ from design_patterns.dataclasses.push_notification import (
     Platform,
 )
 from design_patterns.factory_method.notification import Notification
-from design_patterns.models.notification import AWSNotificationResponse
 
 
 class PushNotificationError(Exception):
@@ -17,7 +18,7 @@ class PushNotificationError(Exception):
 
 class PushNotification(Notification):
     def __init__(self, platform: Platform):
-        super().__init__('sns')
+        super().__init__(AWSClientStrategyType.SNS)
         self.platform = platform
 
     def send_notification(self, device_token: str, body: str,
@@ -29,12 +30,10 @@ class PushNotification(Notification):
 
     def _aws_client_handler(self) -> None:
         try:
-            response = self.client.publish(
-                TargetArn=self.endpoint_arn,
-                MessageStructure='json',
-                Message=asdict(self.payload)
+            response = self.client.sns_client_topic_strategy.perform_operation(
+                self.endpoint_arn,
+                asdict(self.payload)
             )
-            response = AWSNotificationResponse(**response)
             assert response.response_metadata.http_status_code == 200
         except Exception:
             raise PushNotificationError(
@@ -50,10 +49,8 @@ class PushNotification(Notification):
 
     def _register_device(self, device_token: str) -> None:
         try:
-            response = self.client.create_platform_endpoint(
-                PlatformApplicationArn=self.platform_arn,
-                Token=device_token
-            )
+            response = self.client.sns_client_platform_strategy.\
+                perform_operation(self.platform_arn, device_token)
             self.endpoint_arn = response['EndpointArn']
         except Exception:
             raise PushNotificationError(
